@@ -1,0 +1,68 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+  org: jhonson
+  # "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+  app: app-clase1
+  # "service" is the name of this project. This will also be added to your AWS resource names.
+  service: App-Jhonson
+
+  provider:
+    name: aws
+    runtime: nodejs20.x
+    iamRoleStatements:
+        - Effect: Allow
+          Action:
+            - dynamodb:*
+          Resource:
+          -  arn:aws:dynamodb:us-east-1:648908580448:table/usersTable
+
+  functions:
+    hello:
+      handler: src/handler.hello
+      events:
+        - httpApi:
+            path: /
+            method: get
+    agregarTask: 
+      handler: src/AgregarTask.agregarTask
+      events:
+        - httpApi:
+            path: /tareas
+            method: put
+    actualizarTask: 
+      handler: src/AgregarTask.actualizarTask
+      events:
+        - httpApi:
+            path: /tareas/{id}
+            method: put
+    obtenerTask: 
+      handler: src/ObtenerTask.obtenerTask
+      events:
+        - httpApi:
+            path: /tareas
+            method: get
+    obtenerTasks: 
+      handler: src/ObtenerTask.obtenerTasks
+      events:
+        - httpApi:
+            path: /tarea/{id}
+            method: get
+    eliminarTask: 
+      handler: src/EliminarTask.eliminarTask
+      events:
+        - httpApi:
+            path: /tarea/{id}
+            method: delete
+
+  resources: # CloudFormation template syntax from here on.
+    Resources:
+      usersTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+          TableName: usersTable
+          BillingMode: PAY_PER_REQUEST
+          AttributeDefinitions:
+            - AttributeName: id
+              AttributeType: S
+          KeySchema:
+            - AttributeName: id
+              KeyType: HASH
