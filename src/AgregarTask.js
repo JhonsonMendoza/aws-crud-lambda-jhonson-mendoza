@@ -1,11 +1,31 @@
-const { v4: uuidv4 } = require('uuid');
-const { DynamoDB } = require('aws-sdk');
+const {
+    v4: uuidv4
+} = require('uuid');
+
+const {
+    DynamoDB
+} = require('aws-sdk');
 
 exports.agregarTask = async (event) => {
-    const { titulo, descripcion } = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    const {
+        titulo,
+        descripcion
+    } = body;
+    
+    if (!titulo || !descripcion) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                message: 'Título y descripción son obligatorios',
+            })
+        };
+    }
+
     const fechaCreacion = new Date().toISOString();
     const id = uuidv4();
-    const dynamoDB = new DynamoDB.DocumentClient();
+    const dynamoDB = new(require('aws-sdk')).DynamoDB.DocumentClient();
+
     const item = {
         id,
         titulo,
@@ -13,11 +33,13 @@ exports.agregarTask = async (event) => {
         fechaCreacion,
         estado: false,
     };
+
     try {
         await dynamoDB.put({
-            TableName: 'usersTable', 
+            TableName: 'usersTable',
             Item: item
         }).promise();
+
         return {
             statusCode: 200,
             body: JSON.stringify({
@@ -26,6 +48,7 @@ exports.agregarTask = async (event) => {
             })
         };
     } catch (error) {
+        console.error("Error al guardar tarea:", error);
         return {
             statusCode: 500,
             body: JSON.stringify({
@@ -34,19 +57,34 @@ exports.agregarTask = async (event) => {
             })
         };
     }
+
 };
 
 exports.actualizarTask = async (event) => {
-    const { titulo, descripcion, estado } = JSON.parse(event.body);
+    const {
+        titulo,
+        descripcion,
+        estado
+    } = JSON.parse(event.body);
     const fechaActualizacion = new Date().toISOString();
-    const { id } = event.pathParameters;
-    const dynamoDB = new DynamoDB.DocumentClient();
+    const {
+        id
+    } = event.pathParameters;
+    if (!titulo || !descripcion || typeof estado !== 'boolean') {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                message: 'Datos incompletos o inválidos',
+            })
+        };
+    }
+    const dynamoDB = new(require('aws-sdk')).DynamoDB.DocumentClient();
 
     try {
         const response = await dynamoDB.update({
             TableName: 'usersTable',
             Key: {
-                id, // Usar el id obtenido desde la ruta
+                id
             },
             UpdateExpression: 'set titulo = :titulo, descripcion = :descripcion, fechaCreacion = :fechaActualizacion, estado = :estado',
             ExpressionAttributeValues: {
@@ -66,12 +104,14 @@ exports.actualizarTask = async (event) => {
             })
         };
     } catch (error) {
+        console.error("Error al actualizar tarea:", error);
         return {
             statusCode: 500,
             body: JSON.stringify({
-                message: 'Error al guardar tarea',
+                message: 'Error al actualizar tarea',
                 error: error.message
             })
         };
     }
+
 };

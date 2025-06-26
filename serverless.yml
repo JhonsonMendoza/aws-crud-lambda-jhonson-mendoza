@@ -27,7 +27,7 @@
       events:
         - httpApi:
             path: /tareas
-            method: put
+            method: post
     actualizarTask: 
       handler: src/AgregarTask.actualizarTask
       events:
