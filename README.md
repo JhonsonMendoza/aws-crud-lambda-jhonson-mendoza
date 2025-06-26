@@ -203,6 +203,7 @@ Log registrado en CloudWatch:
 ```
 Error al guardar tarea: SyntaxError: Unexpected token a in JSON at position 1
 ```
+ENLACE REPOSITORIO GITHUB: https://github.com/JhonsonMendoza/aws-crud-lambda-jhonson-mendoza.git
 
 ## Conclusiones
 
